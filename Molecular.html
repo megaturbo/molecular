@@ -9,6 +9,8 @@
 
     <script src="o/utils.js"></script>
     <script src="o/molecular.js"></script>
+    <script src="o/Renderer.js"></script>
+    <script src="o/Scene.js"></script>
 
     <script id="shader-vs" type="x-shader/x-vertex">
 			attribute vec3 aVertexPosition;
@@ -39,28 +41,6 @@
     </script>
 
     <script>
-
-        var molecules = [];
-
-        function createScene() {
-            // Creating a molecule
-            var white = new Color(1.0, 1.0, 1.0, 1.0);
-            var red = new Color(1.0, 0.0, 0.0, 1.0);
-
-            var atoms = [
-                new Atom("H", white, 0.2, new Point3d(-0.76537, 0.0, 0.19508)),
-                new Atom("H", white, 0.2, new Point3d(0.76357, 0.0, 0.19508)),
-                new Atom("O", red, 0.35, new Point3d(0.0, 0.7, -0.39016))
-            ];
-
-            var links = [
-                new Link(atoms[0], atoms[2]),
-                new Link(atoms[1], atoms[2])
-            ];
-
-            molecules.push(new Molecule("Water (H2O)", atoms, links));
-        }
-
         // Camera movements
         var rotX = 0.0;
         var rotY = 0.0;
@@ -90,59 +70,6 @@
                     console.log(ev.keyCode);
                     break;
             }
-        }
-
-        function initShaderParameters(prg) {
-            prg.vertexPositionAttribute = glContext.getAttribLocation(prg, "aVertexPosition");
-            glContext.enableVertexAttribArray(prg.vertexPositionAttribute);
-            prg.colorAttribute = glContext.getAttribLocation(prg, "aColor");
-            glContext.enableVertexAttribArray(prg.colorAttribute);
-
-            prg.pMatrixUniform = glContext.getUniformLocation(prg, 'uPMatrix');
-            prg.mvMatrixUniform = glContext.getUniformLocation(prg, 'uMVMatrix');
-
-            prg.atomPositionUniform = glContext.getUniformLocation(prg, "uAtomPosition");
-            prg.atomColorUniform = glContext.getUniformLocation(prg, "uAtomColor");
-        }
-
-
-        function initBuffers() {
-            //TODO delete or use it
-        }
-
-        function drawScene() {
-            glContext.clearColor(0.9, 0.9, 1.0, 1.0);
-            glContext.enable(glContext.DEPTH_TEST);
-            glContext.clear(glContext.COLOR_BUFFER_BIT | glContext.DEPTH_BUFFER_BIT);
-            glContext.viewport(0, 0, c_width, c_height);
-            mat4.perspective(pMatrix, degToRad(60), c_width / c_height, 0.1, 10000.0);
-
-            translationMat = mat4.create();
-            mat4.identity(translationMat);
-            mat4.translate(translationMat, translationMat, [movX, movY, movZ]);
-            mvtMatrix = mat4.create();
-            mat4.multiply(mvtMatrix, translationMat, mvMatrix);
-
-            rotateModelViewMatrixUsingQuaternion();
-
-            glContext.uniformMatrix4fv(prg.pMatrixUniform, false, pMatrix);
-            glContext.uniformMatrix4fv(prg.mvMatrixUniform, false, mvtMatrix);
-
-            // Draw those molecules
-            molecules.forEach(function (molecule) {
-                molecule.draw(glContext);
-            });
-
-            // Nice
-            rotY = 0;
-            rotX = 0;
-        }
-        function initWebGL() {
-            glContext = getGLContext('webgl-canvas');
-            initProgram();
-//            initBuffers();
-            createScene();
-            renderLoop();
         }
     </script>
 </head>

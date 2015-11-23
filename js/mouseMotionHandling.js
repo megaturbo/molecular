@@ -53,7 +53,7 @@ function handleMouseUp(event){
 var currentRy = 0; //keeps the current rotation on y, used to keep the billboards orientation
 
 function rotateModelViewMatrixUsingQuaternion(stop) {
-	
+
 	stop = typeof stop !== 'undefined' ? stop : false;
 	//use quaternion rotations for the rotation of the object with the mouse
 	/*angle = degToRad(rotY);

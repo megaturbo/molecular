@@ -3,13 +3,8 @@
  */
 
 /*
- STATICS
+ GLOBALS
  */
-
-// Consts
-const ICO_SUBDIVISIONS = 3;
-const X = 0.525731112119133696;
-const Z = 0.850650808352039932;
 
 // Icosahedron
 var INDEX_CNT = 0;
@@ -17,59 +12,13 @@ var atomVertices = [];
 var atomIndices = [];
 var atomColors = [];
 
-var ICO_VERTICES = [];
-var ICO_INDICES = [];
-
-ICO_VERTICES.push(-X, 0.0, Z);
-ICO_VERTICES.push(X, 0.0, Z);
-ICO_VERTICES.push(-X, 0.0, -Z);
-ICO_VERTICES.push(X, 0.0, -Z);
-ICO_VERTICES.push(0.0, Z, X);
-ICO_VERTICES.push(0.0, Z, -X);
-ICO_VERTICES.push(0.0, -Z, X);
-ICO_VERTICES.push(0.0, -Z, -X);
-ICO_VERTICES.push(Z, X, 0.0);
-ICO_VERTICES.push(-Z, X, 0.0);
-ICO_VERTICES.push(Z, -X, 0.0);
-ICO_VERTICES.push(-Z, -X, 0.0);
-
-ICO_INDICES.push(1, 4, 0);
-ICO_INDICES.push(4, 9, 0);
-ICO_INDICES.push(4, 5, 9);
-ICO_INDICES.push(8, 5, 4);
-ICO_INDICES.push(1, 8, 4);
-ICO_INDICES.push(1, 10, 8);
-ICO_INDICES.push(10, 3, 8);
-ICO_INDICES.push(8, 3, 5);
-ICO_INDICES.push(3, 2, 5);
-ICO_INDICES.push(3, 7, 2);
-ICO_INDICES.push(3, 10, 7);
-ICO_INDICES.push(10, 6, 7);
-ICO_INDICES.push(6, 11, 7);
-ICO_INDICES.push(6, 0, 11);
-ICO_INDICES.push(6, 1, 0);
-ICO_INDICES.push(10, 1, 6);
-ICO_INDICES.push(11, 0, 9);
-ICO_INDICES.push(2, 11, 9);
-ICO_INDICES.push(5, 2, 9);
-ICO_INDICES.push(11, 2, 7);
-
-// INIT
-for (i = 0; i < ICO_INDICES.length; i += 3) {
-    var v1 = [];
-    var v2 = [];
-    var v3 = [];
-
-    var start = atomIndices[i] * 3;
-    v1.push(atomVertices[start], atomVertices[start + 1], atomVertices[start + 2]);
-
-    start = atomIndices[i + 1] * 3;
-    v2.push(atomVertices[start], atomVertices[start + 1], atomVertices[start + 2]);
-
-    start = atomIndices[i + 2] * 3;
-    v3.push(atomVertices[start], atomVertices[start + 1], atomVertices[start + 2]);
-
-    subdivise(v1, v2, v3, ICO_SUBDIVISIONS);
+/**
+ * You need to call this method before using those classes.
+ *
+ * It will init the main isocahedron used to render beautiful spheres.
+ */
+function initMolecular(){
+    initIcosahedron();
 }
 
 /**
@@ -112,9 +61,6 @@ function Atom(name, color, radius, position) {
     this.radius = radius;
     this.position = position;
 
-    console.log("[Atom:" + this.name + "] " + "Creating a vertices buffer with " + atomVertices.length + " vertices");
-    console.log("[Atom:" + this.name + "] " + "Creating a colors buffer with " + atomColors.length + " colors");
-    console.log("[Atom:" + this.name + "] " + "Creating an indices buffer with " + atomIndices.length + " indices");
     Atom.verticesBuffer = getVertexBufferWithVertices(atomVertices);
     Atom.colorsBuffer = getVertexBufferWithVertices(atomColors);
     Atom.indicesBuffer = getIndexBufferWithIndices(atomIndices);
@@ -203,5 +149,68 @@ function subdivise(v1, v2, v3, depth) {
         subdivise(v2, v23, v12, depth - 1);
         subdivise(v3, v31, v23, depth - 1);
         subdivise(v12, v23, v31, depth - 1);
+    }
+}
+
+
+function initIcosahedron(){
+    // Consts
+    const subdivisions = 3;
+    const X = 0.525731112119133696;
+    const Z = 0.850650808352039932;
+
+    var ICO_VERTICES = [];
+    var ICO_INDICES = [];
+
+    ICO_VERTICES.push(-X, 0.0, Z);
+    ICO_VERTICES.push(X, 0.0, Z);
+    ICO_VERTICES.push(-X, 0.0, -Z);
+    ICO_VERTICES.push(X, 0.0, -Z);
+    ICO_VERTICES.push(0.0, Z, X);
+    ICO_VERTICES.push(0.0, Z, -X);
+    ICO_VERTICES.push(0.0, -Z, X);
+    ICO_VERTICES.push(0.0, -Z, -X);
+    ICO_VERTICES.push(Z, X, 0.0);
+    ICO_VERTICES.push(-Z, X, 0.0);
+    ICO_VERTICES.push(Z, -X, 0.0);
+    ICO_VERTICES.push(-Z, -X, 0.0);
+
+    ICO_INDICES.push(1, 4, 0);
+    ICO_INDICES.push(4, 9, 0);
+    ICO_INDICES.push(4, 5, 9);
+    ICO_INDICES.push(8, 5, 4);
+    ICO_INDICES.push(1, 8, 4);
+    ICO_INDICES.push(1, 10, 8);
+    ICO_INDICES.push(10, 3, 8);
+    ICO_INDICES.push(8, 3, 5);
+    ICO_INDICES.push(3, 2, 5);
+    ICO_INDICES.push(3, 7, 2);
+    ICO_INDICES.push(3, 10, 7);
+    ICO_INDICES.push(10, 6, 7);
+    ICO_INDICES.push(6, 11, 7);
+    ICO_INDICES.push(6, 0, 11);
+    ICO_INDICES.push(6, 1, 0);
+    ICO_INDICES.push(10, 1, 6);
+    ICO_INDICES.push(11, 0, 9);
+    ICO_INDICES.push(2, 11, 9);
+    ICO_INDICES.push(5, 2, 9);
+    ICO_INDICES.push(11, 2, 7);
+
+// INIT
+    for (i = 0; i < ICO_INDICES.length; i += 3) {
+        var v1 = [];
+        var v2 = [];
+        var v3 = [];
+
+        var start = atomIndices[i] * 3;
+        v1.push(atomVertices[start], atomVertices[start + 1], atomVertices[start + 2]);
+
+        start = atomIndices[i + 1] * 3;
+        v2.push(atomVertices[start], atomVertices[start + 1], atomVertices[start + 2]);
+
+        start = atomIndices[i + 2] * 3;
+        v3.push(atomVertices[start], atomVertices[start + 1], atomVertices[start + 2]);
+
+        subdivise(v1, v2, v3, subdivisions);
     }
 }
