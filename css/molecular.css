@@ -1,0 +1,82 @@
+/**
+ * Molecular CSS
+ * Author: Thomas Roulin
+ */
+
+@import url(https://fonts.googleapis.com/css?family=Oswald:400,700,300);
+
+body {
+    font-family: 'Oswald', sans-serif;
+    font-weight: normal;
+    background-color: whitesmoke;
+    font-size: 1em;
+    margin: 0px;
+    padding: 0px 0px 25px 0px;
+}
+
+p {
+    margin: 10px;
+}
+
+select{
+    font-family: 'Oswald', sans-serif;
+}
+
+header {
+    margin: 0px;
+    padding: 20px 20px;
+    background-color: lightslategray;
+    color: white;
+}
+
+section {
+    margin: 0px auto;
+    width: 1000px;
+}
+
+h1 {
+    margin: 0px;
+}
+
+h2 {
+    clear: both;
+    position: relative;
+    margin-top: 2em;
+    margin-bottom: 0.5em;
+    font-size: 1.5em;
+    font-weight: bold;
+    text-transform: uppercase;
+    color: #3E6392;
+}
+
+/*
+h2:before { 
+	content: ""; 
+	position:absolute; 
+	top: 50%; 
+	left: 0; 
+	width: 100%; 
+	border-bottom: 4px solid #3E6392; 
+}
+*/
+h2 span {
+    position: relative;
+    display: inline-block;
+    padding-right: 1.4em;
+    background: #fff;
+}
+
+h3 img {
+    vertical-align: middle;
+    margin: 0px 5px;
+}
+
+canvas {
+    border: 0px solid #000000;
+    background-color: #EEEEEE;
+    margin: 10px auto;
+}
+
+#container{
+    margin: 20px;
+}
