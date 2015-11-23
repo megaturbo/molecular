@@ -13,6 +13,10 @@
     <script id="shader-vs" type="x-shader/x-vertex">
 			attribute vec3 aVertexPosition;
 			attribute vec4 aColor;
+
+			uniform vec3 uAtomPosition;
+			uniform vec4 uAtomColor;
+
 		    uniform mat4 uMVMatrix;
 		    uniform mat4 uPMatrix;
 			varying vec4 vColor;
@@ -20,8 +24,8 @@
 		        vec4 transformedVertexPos = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
 				gl_Position = transformedVertexPos;
 				vColor = aColor;
-                gl_PointSize = 10.0;
 			}
+
     </script>
     <script id="shader-fs" type="x-shader/x-fragment">
 			#ifdef GL_ES
@@ -31,46 +35,43 @@
 			void main(void) {
 		   		gl_FragColor = vColor;
 			}
+
     </script>
 
     <script>
-        var indexCnt = 0;
 
-        // Creating a molecule
-        var white = new Color(1.0, 1.0, 1.0, 1.0);
-        var red = new Color(1.0, 0.0, 0.0, 1.0);
+        var molecules = [];
 
-        var atoms = [
-            new Atom(glContext, "H", white, 0.2, new Point3d(-0.76537, 0.0, 0.19508)),
-            new Atom(glContext, "H", white, 0.2, new Point3d(0.76357, 0.0, 0.19508)),
-            new Atom(glContext, "O", red, 0.35, new Point3d(0.0, 0.7, -0.39016))
-        ];
+        function createScene() {
+            // Creating a molecule
+            var white = new Color(1.0, 1.0, 1.0, 1.0);
+            var red = new Color(1.0, 0.0, 0.0, 1.0);
 
-        var links = [
-            new Link(atoms[0], atoms[2]),
-            new Link(atoms[1], atoms[2])
-        ];
+            var atoms = [
+                new Atom("H", white, 0.2, new Point3d(-0.76537, 0.0, 0.19508)),
+                new Atom("H", white, 0.2, new Point3d(0.76357, 0.0, 0.19508)),
+                new Atom("O", red, 0.35, new Point3d(0.0, 0.7, -0.39016))
+            ];
 
-        var waterMolecule = new Molecule(atoms, links);
+            var links = [
+                new Link(atoms[0], atoms[2]),
+                new Link(atoms[1], atoms[2])
+            ];
 
+            molecules.push(new Molecule("Water (H2O)", atoms, links));
+        }
 
+        // Camera movements
         var rotX = 0.0;
         var rotY = 0.0;
         var movX = 0.0;
         var movY = 0.0;
         var movZ = -5.0;
 
-        var vertexBuffer = null;
-        var indexBuffer = null;
-        var colorBuffer = null;
-        var indices = [];
-        var vertices = [];
-        var colors = [];
-        var sphereDivisions = 3;
         var mvMatrix = mat4.create();
         var pMatrix = mat4.create();
-        window.onkeydown = checkKey;
 
+        window.onkeydown = checkKey;
         function checkKey(ev) {
             switch (ev.keyCode) {
                 case 65:
@@ -96,85 +97,17 @@
             glContext.enableVertexAttribArray(prg.vertexPositionAttribute);
             prg.colorAttribute = glContext.getAttribLocation(prg, "aColor");
             glContext.enableVertexAttribArray(prg.colorAttribute);
+
             prg.pMatrixUniform = glContext.getUniformLocation(prg, 'uPMatrix');
             prg.mvMatrixUniform = glContext.getUniformLocation(prg, 'uMVMatrix');
-        }
 
-        function createIcosaedre() {
-            vertices = [];
-            indices = [];
-            colors = [];
-            var ico_vertices = [];
-            var ico_indices = [];
-
-            var X = 0.525731112119133696;
-            var Z = 0.850650808352039932;
-            ico_vertices.push(-X, 0.0, Z);
-            ico_vertices.push(X, 0.0, Z);
-            ico_vertices.push(-X, 0.0, -Z);
-            ico_vertices.push(X, 0.0, -Z);
-            ico_vertices.push(0.0, Z, X);
-            ico_vertices.push(0.0, Z, -X);
-            ico_vertices.push(0.0, -Z, X);
-            ico_vertices.push(0.0, -Z, -X);
-            ico_vertices.push(Z, X, 0.0);
-            ico_vertices.push(-Z, X, 0.0);
-            ico_vertices.push(Z, -X, 0.0);
-            ico_vertices.push(-Z, -X, 0.0);
-            ico_indices.push(1, 4, 0);
-            ico_indices.push(4, 9, 0);
-            ico_indices.push(4, 5, 9);
-            ico_indices.push(8, 5, 4);
-            ico_indices.push(1, 8, 4);
-            ico_indices.push(1, 10, 8);
-            ico_indices.push(10, 3, 8);
-            ico_indices.push(8, 3, 5);
-            ico_indices.push(3, 2, 5);
-            ico_indices.push(3, 7, 2);
-            ico_indices.push(3, 10, 7);
-            ico_indices.push(10, 6, 7);
-            ico_indices.push(6, 11, 7);
-            ico_indices.push(6, 0, 11);
-            ico_indices.push(6, 1, 0);
-            ico_indices.push(10, 1, 6);
-            ico_indices.push(11, 0, 9);
-            ico_indices.push(2, 11, 9);
-            ico_indices.push(5, 2, 9);
-            ico_indices.push(11, 2, 7);
-
-            var sphereColor = new Color(1.0, 0.5, 1.0, 1.0);
-
-            for (i = 0; i < ico_indices.length; i += 3) {
-                var v1 = [];
-                var v2 = [];
-                var v3 = [];
-
-                var start = ico_indices[i] * 3;
-                v1.push(ico_vertices[start],
-                        ico_vertices[start + 1],
-                        ico_vertices[start + 2]);
-
-                start = ico_indices[i + 1] * 3;
-                v2.push(ico_vertices[start],
-                        ico_vertices[start + 1],
-                        ico_vertices[start + 2]);
-
-                start = ico_indices[i + 2] * 3;
-                v3.push(ico_vertices[start],
-                        ico_vertices[start + 1],
-                        ico_vertices[start + 2]);
-
-                subdivise(v1, v2, v3, sphereDivisions, sphereColor);
-            }
-
-            vertexBuffer = getVertexBufferWithVertices(vertices);
-            indexBuffer = getIndexBufferWithIndices(indices);
-            colorBuffer = getVertexBufferWithVertices(colors);
+            prg.atomPositionUniform = glContext.getUniformLocation(prg, "uAtomPosition");
+            prg.atomColorUniform = glContext.getUniformLocation(prg, "uAtomColor");
         }
 
 
         function initBuffers() {
-            createIcosaedre();
+            //TODO delete or use it
         }
 
         function drawScene() {
@@ -195,12 +128,10 @@
             glContext.uniformMatrix4fv(prg.pMatrixUniform, false, pMatrix);
             glContext.uniformMatrix4fv(prg.mvMatrixUniform, false, mvtMatrix);
 
-            glContext.bindBuffer(glContext.ARRAY_BUFFER, vertexBuffer);
-            glContext.vertexAttribPointer(prg.vertexPositionAttribute, 3, glContext.FLOAT, false, 0, 0);
-            glContext.bindBuffer(glContext.ARRAY_BUFFER, colorBuffer);
-            glContext.vertexAttribPointer(prg.colorAttribute, 4, glContext.FLOAT, false, 0, 0);
-            glContext.bindBuffer(glContext.ELEMENT_ARRAY_BUFFER, indexBuffer);
-            glContext.drawElements(glContext.LINES, indices.length, glContext.UNSIGNED_SHORT, 0);
+            // Draw those molecules
+            molecules.forEach(function (molecule) {
+                molecule.draw(glContext);
+            });
 
             // Nice
             rotY = 0;
@@ -209,7 +140,8 @@
         function initWebGL() {
             glContext = getGLContext('webgl-canvas');
             initProgram();
-            initBuffers();
+//            initBuffers();
+            createScene();
             renderLoop();
         }
     </script>
