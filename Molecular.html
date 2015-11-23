@@ -7,6 +7,9 @@
     <script src="js/gl-matrix-min.js"></script>
     <script src="js/webglTools.js"></script>
 
+    <script src="o/utils.js"></script>
+    <script src="o/molecular.js"></script>
+
     <script id="shader-vs" type="x-shader/x-vertex">
 			attribute vec3 aVertexPosition;
 			attribute vec4 aColor;
@@ -16,14 +19,9 @@
 		    void main(void) {
 		        vec4 transformedVertexPos = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
 				gl_Position = transformedVertexPos;
-				vec3 colorComponents = aColor.xyz + transformedVertexPos.z * 0.5;
-				vColor = vec4(colorComponents, 1.0);
+				vColor = aColor;
+                gl_PointSize = 10.0;
 			}
-
-
-
-
-
     </script>
     <script id="shader-fs" type="x-shader/x-fragment">
 			#ifdef GL_ES
@@ -33,81 +31,19 @@
 			void main(void) {
 		   		gl_FragColor = vColor;
 			}
-
-
-
-
-
     </script>
 
     <script>
-        /**
-         * Molecule
-         *
-         * Define a whole molecule
-         *
-         * @param atoms Array of every atoms that compose the molecule
-         * @param links Array of every links between Atoms
-         * @constructor
-         */
-        function Molecule(atoms, links) {
-            this.atoms = atoms;
-            this.links = links;
-        }
+        var indexCnt = 0;
 
-        /**
-         * Atom
-         *
-         * Define an atom
-         *
-         * @param name Name of the atom
-         * @param color Display color
-         * @param radius Radius of the atom
-         * @param position Position in 3D of the Atom
-         * @constructor
-         */
-        function Atom(name, color, radius, position) {
-            this.name = name;
-            this.color = color;
-            this.radius = radius;
-            this.position = position;
-        }
-
-        /**
-         * Link
-         *
-         * Define a link between two atoms
-         *
-         * @param atom1
-         * @param atom2
-         * @constructor
-         */
-        function Link(atom1, atom2) {
-            this.atom1 = atom1;
-            this.atom2 = atom2;
-        }
-
-        function Point3d(x, y, z) {
-            this.x = x;
-            this.y = y;
-            this.z = z;
-        }
-
-        function Color(r, g, b, a) {
-            this.r = r;
-            this.g = g;
-            this.b = b;
-            this.a = a;
-        }
-
+        // Creating a molecule
         var white = new Color(1.0, 1.0, 1.0, 1.0);
         var red = new Color(1.0, 0.0, 0.0, 1.0);
 
-        // testing with H2O
         var atoms = [
-            new Atom("H", white, 0.2, new Point3d(0.0, 0.7, 0.0)),
-            new Atom("H", white, 0.2, new Point3d(0.7, 0.0, 0.0)),
-            new Atom("O", red, 0.35, new Point3d(0.0, 0.0, 0.0))
+            new Atom(glContext, "H", white, 0.2, new Point3d(-0.76537, 0.0, 0.19508)),
+            new Atom(glContext, "H", white, 0.2, new Point3d(0.76357, 0.0, 0.19508)),
+            new Atom(glContext, "O", red, 0.35, new Point3d(0.0, 0.7, -0.39016))
         ];
 
         var links = [
@@ -117,15 +53,20 @@
 
         var waterMolecule = new Molecule(atoms, links);
 
-        var rotY = 0;
-        var rotX = 0;
+
+        var rotX = 0.0;
+        var rotY = 0.0;
+        var movX = 0.0;
+        var movY = 0.0;
+        var movZ = -5.0;
+
         var vertexBuffer = null;
         var indexBuffer = null;
         var colorBuffer = null;
         var indices = [];
         var vertices = [];
         var colors = [];
-        var indexCnt = 0;
+        var sphereDivisions = 3;
         var mvMatrix = mat4.create();
         var pMatrix = mat4.create();
         window.onkeydown = checkKey;
@@ -133,16 +74,16 @@
         function checkKey(ev) {
             switch (ev.keyCode) {
                 case 65:
-                    rotY -= 2.0;
+                    movX -= 0.5;
                     break;
                 case 68:
-                    rotY += 2.0;
+                    movX += 0.5;
                     break;
                 case 87:
-                    rotX -= 2.0;
+                    movZ += 0.5;
                     break;
                 case 83:
-                    rotX += 2.0;
+                    movZ -= 0.5;
                     break;
                 default:
                     console.log(ev.keyCode);
@@ -159,90 +100,72 @@
             prg.mvMatrixUniform = glContext.getUniformLocation(prg, 'uMVMatrix');
         }
 
-        //        function normalize(v) {
-        //            var d = Math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
-        //            if (d != 0.0) {
-        //                v[0] /= d;
-        //                v[1] /= d;
-        //                v[2] /= d;
-        //            }
-        //            return v;
-        //        }
-        //        function subdivise(v1, v2, v3, depth) {
-        //            var v12 = [];
-        //            var v23 = [];
-        //            var v31 = [];
-        //            var i;
-        //
-        //            if (depth == 0) {
-        //                vertices.push(v1[0], v1[1], v1[2]);
-        //                colors.push(vertexColor[0], vertexColor[1], vertexColor[2], vertexColor[3]);
-        //                vertices.push(v2[0], v2[1], v2[2]);
-        //                colors.push(vertexColor[0], vertexColor[1], vertexColor[2], vertexColor[3]);
-        //                vertices.push(v3[0], v3[1], v3[2]);
-        //                colors.push(vertexColor[0], vertexColor[1], vertexColor[2], vertexColor[3]);
-        //                indices.push(indexCnt, indexCnt + 1, indexCnt + 1, indexCnt + 2, indexCnt + 2, indexCnt);
-        //                indexCnt += 3;
-        //            } else {
-        //                for (i = 0; i < 3; i++) {
-        //                    v12.push((v1[i] + v2[i]) / 2.0);
-        //                    v23.push((v2[i] + v3[i]) / 2.0);
-        //                    v31.push((v3[i] + v1[i]) / 2.0);
-        //                }
-        //                v12 = normalize(v12);
-        //                v23 = normalize(v23);
-        //                v31 = normalize(v31);
-        //                subdivise(v1, v12, v31, depth - 1);
-        //                subdivise(v2, v23, v12, depth - 1);
-        //                subdivise(v3, v31, v23, depth - 1);
-        //                subdivise(v12, v23, v31, depth - 1);
-        //            }
-        //        }
-
         function createIcosaedre() {
             vertices = [];
-            colors = [];
             indices = [];
+            colors = [];
+            var ico_vertices = [];
+            var ico_indices = [];
 
-            phi = (1.0 + Math.sqrt(5.0)) / 2.0;
-            vertices.push(-phi, 0.0, 1.0);
-            vertices.push(phi, 0.0, 1.0);
-            vertices.push(-phi, 0.0, -1.0);
-            vertices.push(phi, 0.0, -1.0);
-            vertices.push(0.0, 1.0, phi);
-            vertices.push(0.0, 1.0, -phi);
-            vertices.push(0.0, -1.0, phi);
-            vertices.push(0.0, -1.0, -phi);
-            vertices.push(1.0, phi, 0.0);
-            vertices.push(-1.0, phi, 0.0);
-            vertices.push(1.0, -phi, 0.0);
-            vertices.push(-1.0, -phi, 0.0);
+            var X = 0.525731112119133696;
+            var Z = 0.850650808352039932;
+            ico_vertices.push(-X, 0.0, Z);
+            ico_vertices.push(X, 0.0, Z);
+            ico_vertices.push(-X, 0.0, -Z);
+            ico_vertices.push(X, 0.0, -Z);
+            ico_vertices.push(0.0, Z, X);
+            ico_vertices.push(0.0, Z, -X);
+            ico_vertices.push(0.0, -Z, X);
+            ico_vertices.push(0.0, -Z, -X);
+            ico_vertices.push(Z, X, 0.0);
+            ico_vertices.push(-Z, X, 0.0);
+            ico_vertices.push(Z, -X, 0.0);
+            ico_vertices.push(-Z, -X, 0.0);
+            ico_indices.push(1, 4, 0);
+            ico_indices.push(4, 9, 0);
+            ico_indices.push(4, 5, 9);
+            ico_indices.push(8, 5, 4);
+            ico_indices.push(1, 8, 4);
+            ico_indices.push(1, 10, 8);
+            ico_indices.push(10, 3, 8);
+            ico_indices.push(8, 3, 5);
+            ico_indices.push(3, 2, 5);
+            ico_indices.push(3, 7, 2);
+            ico_indices.push(3, 10, 7);
+            ico_indices.push(10, 6, 7);
+            ico_indices.push(6, 11, 7);
+            ico_indices.push(6, 0, 11);
+            ico_indices.push(6, 1, 0);
+            ico_indices.push(10, 1, 6);
+            ico_indices.push(11, 0, 9);
+            ico_indices.push(2, 11, 9);
+            ico_indices.push(5, 2, 9);
+            ico_indices.push(11, 2, 7);
 
-            console.log(vertices);
+            var sphereColor = new Color(1.0, 0.5, 1.0, 1.0);
 
-            for (i = 0; i < 12; i++) {
-                colors.push(1.0, 0.0, 0.0, 1.0);
+            for (i = 0; i < ico_indices.length; i += 3) {
+                var v1 = [];
+                var v2 = [];
+                var v3 = [];
+
+                var start = ico_indices[i] * 3;
+                v1.push(ico_vertices[start],
+                        ico_vertices[start + 1],
+                        ico_vertices[start + 2]);
+
+                start = ico_indices[i + 1] * 3;
+                v2.push(ico_vertices[start],
+                        ico_vertices[start + 1],
+                        ico_vertices[start + 2]);
+
+                start = ico_indices[i + 2] * 3;
+                v3.push(ico_vertices[start],
+                        ico_vertices[start + 1],
+                        ico_vertices[start + 2]);
+
+                subdivise(v1, v2, v3, sphereDivisions, sphereColor);
             }
-
-            indices.push(4, 8, 1);
-            indices.push(10, 6, 1);
-            indices.push(6, 4, 1);
-            indices.push(8, 3, 1);
-            indices.push(3, 10, 1);
-            indices.push(4, 9, 8);
-            indices.push(2, 9, 0);
-            indices.push(9, 4, 0);
-            indices.push(11, 6, 10);
-            indices.push(11, 2, 0);
-            indices.push(6, 11, 0);
-            indices.push(5, 3, 8);
-            indices.push(9, 5, 8);
-            indices.push(5, 9, 2);
-            indices.push(3, 7, 10);
-            indices.push(7, 11, 10);
-            indices.push(11, 7, 2);
-            indices.push(7, 5, 2);
-            indices.push(5, 7, 3);
 
             vertexBuffer = getVertexBufferWithVertices(vertices);
             indexBuffer = getIndexBufferWithIndices(indices);
@@ -259,15 +182,13 @@
             glContext.enable(glContext.DEPTH_TEST);
             glContext.clear(glContext.COLOR_BUFFER_BIT | glContext.DEPTH_BUFFER_BIT);
             glContext.viewport(0, 0, c_width, c_height);
-            mat4.perspective(pMatrix, degToRad(60), c_width /c_height, 0.1, 10000.0);
-            mat4.identity(mvMatrix);
+            mat4.perspective(pMatrix, degToRad(60), c_width / c_height, 0.1, 10000.0);
 
             translationMat = mat4.create();
             mat4.identity(translationMat);
-            mat4.translate(translationMat, translationMat, [0.0, 0.0, -1.0]);
+            mat4.translate(translationMat, translationMat, [movX, movY, movZ]);
             mvtMatrix = mat4.create();
             mat4.multiply(mvtMatrix, translationMat, mvMatrix);
-
 
             rotateModelViewMatrixUsingQuaternion();
 
@@ -280,6 +201,10 @@
             glContext.vertexAttribPointer(prg.colorAttribute, 4, glContext.FLOAT, false, 0, 0);
             glContext.bindBuffer(glContext.ELEMENT_ARRAY_BUFFER, indexBuffer);
             glContext.drawElements(glContext.LINES, indices.length, glContext.UNSIGNED_SHORT, 0);
+
+            // Nice
+            rotY = 0;
+            rotX = 0;
         }
         function initWebGL() {
             glContext = getGLContext('webgl-canvas');
