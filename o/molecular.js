@@ -17,7 +17,7 @@ var atomColors = [];
  *
  * It will init the main isocahedron used to render beautiful spheres.
  */
-function initMolecular(){
+function initMolecular() {
     initIcosahedron();
 }
 
@@ -40,6 +40,9 @@ function Molecule(name, atoms, links) {
         this.atoms.forEach(function (atom) {
             atom.draw(context);
         });
+        //this.links.forEach(function (link) {
+        //    link.draw(context);
+        //});
     }
 }
 
@@ -72,11 +75,12 @@ function Atom(name, color, radius, position) {
         context.bindBuffer(context.ARRAY_BUFFER, Atom.colorsBuffer);
         context.vertexAttribPointer(prg.colorAttribute, 4, context.FLOAT, false, 0, 0);
 
-        context.uniform3f(prg.atomPositionUniform, this.position.x, this.position.y, this.position.z);
-        context.uniform4f(prg.atomColorUniform, this.color.r, this.color.g, this.color.b, this.color.a);
+        context.uniform3fv(prg.atomPositionUniform, this.position.toArray());
+        context.uniform4fv(prg.atomColorUniform, this.color.toArray());
+        context.uniform1f(prg.atomRadiusUniform, this.radius);
 
         context.bindBuffer(context.ELEMENT_ARRAY_BUFFER, Atom.indicesBuffer);
-        context.drawElements(context.LINES, atomIndices.length, context.UNSIGNED_SHORT, 0);
+        context.drawElements(context.TRIANGLE_STRIP, atomIndices.length, context.UNSIGNED_SHORT, 0);
     }
 }
 
@@ -91,14 +95,31 @@ function Atom(name, color, radius, position) {
  * @constructor
  */
 function Link(atom1, atom2) {
-    this.atom1 = atom1;
-    this.atom2 = atom2;
+    Link.black = new Color(0.5, 0.5, 0.5, 1.0);
+
+    this.vertices = atom1.position.toArray().concat(atom2.position.toArray());
+
+    this.draw = function (context) {
+        console.log(this.vertices);
+        context.bindBuffer(context.ARRAY_BUFFER, getVertexBufferWithVertices(this.vertices));
+        context.vertexAttribPointer(prg.vertexPositionAttribute, 3, context.FLOAT, false, 0, 0);
+
+        context.uniform1f(prg.atomRadiusUniform, 1.0);
+        context.uniform4fv(prg.atomColorUniform, Link.black.toArray());
+
+        context.bindBuffer(context.ELEMENT_ARRAY_BUFFER, getIndexBufferWithIndices([0, 1]));
+        context.drawElements(context.LINES, 2, context.UNSIGNED_SHORT, 0);
+    };
 }
 
 function Point3d(x, y, z) {
     this.x = x;
     this.y = y;
     this.z = z;
+
+    this.toArray = function () {
+        return [x, y, z];
+    }
 }
 
 function Color(r, g, b, a) {
@@ -106,6 +127,10 @@ function Color(r, g, b, a) {
     this.g = g;
     this.b = b;
     this.a = a;
+
+    this.toArray = function () {
+        return [r, g, b, a];
+    }
 }
 
 /*
@@ -153,7 +178,7 @@ function subdivise(v1, v2, v3, depth) {
 }
 
 
-function initIcosahedron(){
+function initIcosahedron() {
     // Consts
     const subdivisions = 3;
     const X = 0.525731112119133696;
@@ -202,14 +227,14 @@ function initIcosahedron(){
         var v2 = [];
         var v3 = [];
 
-        var start = atomIndices[i] * 3;
-        v1.push(atomVertices[start], atomVertices[start + 1], atomVertices[start + 2]);
+        var start = ICO_INDICES[i] * 3;
+        v1.push(ICO_VERTICES[start], ICO_VERTICES[start + 1], ICO_VERTICES[start + 2]);
 
-        start = atomIndices[i + 1] * 3;
-        v2.push(atomVertices[start], atomVertices[start + 1], atomVertices[start + 2]);
+        start = ICO_INDICES[i + 1] * 3;
+        v2.push(ICO_VERTICES[start], ICO_VERTICES[start + 1], ICO_VERTICES[start + 2]);
 
-        start = atomIndices[i + 2] * 3;
-        v3.push(atomVertices[start], atomVertices[start + 1], atomVertices[start + 2]);
+        start = ICO_INDICES[i + 2] * 3;
+        v3.push(ICO_VERTICES[start], ICO_VERTICES[start + 1], ICO_VERTICES[start + 2]);
 
         subdivise(v1, v2, v3, subdivisions);
     }

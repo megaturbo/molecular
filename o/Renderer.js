@@ -26,6 +26,7 @@ function initShaderParameters(prg) {
 
     prg.atomPositionUniform = glContext.getUniformLocation(prg, "uAtomPosition");
     prg.atomColorUniform = glContext.getUniformLocation(prg, "uAtomColor");
+    prg.atomRadiusUniform = glContext.getUniformLocation(prg, "uAtomRadius");
 }
 
 function initScene(){
@@ -37,9 +38,9 @@ function initScene(){
     var red = new Color(1.0, 0.0, 0.0, 1.0);
 
     var atoms = [
-        new Atom("H", white, 0.2, new Point3d(-0.76537, 0.0, 0.19508)),
-        new Atom("H", white, 0.2, new Point3d(0.76357, 0.0, 0.19508)),
-        new Atom("O", red, 0.35, new Point3d(0.0, 0.7, -0.39016))
+        new Atom("H", white, 0.375, new Point3d(-0.76357, 0.0, 0.19508)),
+        new Atom("H", white, 0.375, new Point3d(0.76357, 0.0, 0.19508)),
+        new Atom("O", red, 0.9, new Point3d(0.0, 0.0, -0.39016))
     ];
 
     var links = [

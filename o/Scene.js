@@ -16,7 +16,7 @@ function Scene(){
 
     this.draw = function(context){
         // init the context
-        context.clearColor(0.9, 0.9, 1.0, 1.0);
+        context.clearColor(0.0, 0.0, 0.0, 1.0);
         context.enable(context.DEPTH_TEST);
         context.clear(context.COLOR_BUFFER_BIT | context.DEPTH_BUFFER_BIT);
         context.viewport(0, 0, c_width, c_height);
@@ -29,10 +29,10 @@ function Scene(){
         mvtMatrix = mat4.create();
         mat4.multiply(mvtMatrix, translationMat, mvMatrix);
 
+        rotateModelViewMatrixUsingQuaternion();
+
         context.uniformMatrix4fv(prg.pMatrixUniform, false, pMatrix);
         context.uniformMatrix4fv(prg.mvMatrixUniform, false, mvtMatrix);
-
-        rotateModelViewMatrixUsingQuaternion();
 
         // And now draw the content of the scene
         this.objects.forEach(function (object){

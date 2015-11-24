@@ -8,9 +8,9 @@
     <script src="js/webglTools.js"></script>
 
     <script src="o/utils.js"></script>
-    <script src="o/molecular.js"></script>
     <script src="o/Renderer.js"></script>
     <script src="o/Scene.js"></script>
+    <script src="o/molecular.js"></script>
 
     <script id="shader-vs" type="x-shader/x-vertex">
 			attribute vec3 aVertexPosition;
@@ -18,14 +18,15 @@
 
 			uniform vec3 uAtomPosition;
 			uniform vec4 uAtomColor;
+			uniform float uAtomRadius;
 
 		    uniform mat4 uMVMatrix;
 		    uniform mat4 uPMatrix;
 			varying vec4 vColor;
 		    void main(void) {
-		        vec4 transformedVertexPos = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+		        vec4 transformedVertexPos = uPMatrix * uMVMatrix * vec4(uAtomRadius * aVertexPosition + uAtomPosition, 1.0);
 				gl_Position = transformedVertexPos;
-				vColor = aColor;
+				vColor = uAtomColor;
 			}
 
     </script>
@@ -78,7 +79,6 @@
 <body onload="initWebGL()">
 <header>
     <h1>molecular</h1>
-
     <p>© Roulin Thomas</p>
 </header>
 
