@@ -180,7 +180,7 @@ function subdivise(v1, v2, v3, depth) {
 
 function initIcosahedron() {
     // Consts
-    const subdivisions = 3;
+    const subdivisions = 5;
     const X = 0.525731112119133696;
     const Z = 0.850650808352039932;
 

@@ -14,6 +14,11 @@ function Scene(){
         this.objects.push(object);
     };
 
+    this.set = function(object){
+        this.objects = [];
+        this.add(object);
+    };
+
     this.draw = function(context){
         // init the context
         context.clearColor(0.0, 0.0, 0.0, 1.0);

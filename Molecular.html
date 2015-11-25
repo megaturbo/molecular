@@ -56,22 +56,28 @@
         function checkKey(ev) {
             switch (ev.keyCode) {
                 case 65:
-                    movX -= 0.5;
+                    movX -= 0.2;
                     break;
                 case 68:
-                    movX += 0.5;
+                    movX += 0.2;
                     break;
                 case 87:
-                    movZ += 0.5;
+                    movZ += 0.2;
                     break;
                 case 83:
-                    movZ -= 0.5;
+                    movZ -= 0.2;
                     break;
                 default:
                     console.log(ev.keyCode);
                     break;
             }
         }
+
+        function changeMolecule(){
+            var select_molecule = document.getElementById("select_molecule");
+            setMolecule(select_molecule.selectedIndex);
+        }
+
     </script>
 </head>
 
@@ -86,10 +92,9 @@
     <div>
         <p>Molecule</p>
         <label for="select_molecule">Choose your molecule</label>
-        <select name="select_molecule" id="select_molecule">
+        <select name="select_molecule" id="select_molecule" onchange="changeMolecule()">
             <option value="0">Eau (H2O)</option>
-            <option value="1">Lol</option>
-            <option value="2">Test</option>
+            <option value="1">Ethane (C2H6)</option>
         </select>
     </div>
     <br>
