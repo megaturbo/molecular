@@ -7,7 +7,7 @@
 
 body {
     font-family: 'Oswald', sans-serif;
-    font-weight: normal;
+    font-weight: 400;
     background-color: whitesmoke;
     font-size: 1em;
     margin: 0px;
@@ -25,7 +25,7 @@ select{
 header {
     margin: 0px;
     padding: 20px 20px;
-    background-color: lightslategray;
+    background-color: #333940;
     color: white;
 }
 
@@ -35,6 +35,9 @@ section {
 }
 
 h1 {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 400;
+    font-size: 72px;
     margin: 0px;
 }
 
@@ -50,13 +53,13 @@ h2 {
 }
 
 /*
-h2:before { 
-	content: ""; 
-	position:absolute; 
-	top: 50%; 
-	left: 0; 
-	width: 100%; 
-	border-bottom: 4px solid #3E6392; 
+h2:before {
+	content: "";
+	position:absolute;
+	top: 50%;
+	left: 0;
+	width: 100%;
+	border-bottom: 4px solid #3E6392;
 }
 */
 h2 span {

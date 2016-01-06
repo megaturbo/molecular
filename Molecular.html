@@ -7,36 +7,74 @@
     <script src="js/gl-matrix-min.js"></script>
     <script src="js/webglTools.js"></script>
 
-    <script src="o/utils.js"></script>
-    <script src="o/Renderer.js"></script>
-    <script src="o/Scene.js"></script>
-    <script src="o/molecular.js"></script>
+    <script src="engine/utils.js"></script>
+    <script src="engine/Renderer.js"></script>
+    <script src="engine/Scene.js"></script>
+    <script src="engine/molecular.js"></script>
 
     <script id="shader-vs" type="x-shader/x-vertex">
-			attribute vec3 aVertexPosition;
-			attribute vec4 aColor;
+        attribute vec3 aVertexPosition;
+        // attribute vec4 aColor;
 
-			uniform vec3 uAtomPosition;
-			uniform vec4 uAtomColor;
-			uniform float uAtomRadius;
+		uniform vec3 uAtomPosition;
+		uniform vec4 uAtomColor;
+		uniform float uAtomRadius;
+		uniform mat4 uMVMatrix;
+		uniform mat4 uPMatrix;
+        uniform vec3 uLightAmbient;
+        uniform vec3 uMaterialDiffuse;
+        uniform vec3 uMaterialSpecular;
+        uniform vec3 uLightPosition;
 
-		    uniform mat4 uMVMatrix;
-		    uniform mat4 uPMatrix;
-			varying vec4 vColor;
-		    void main(void) {
-		        vec4 transformedVertexPos = uPMatrix * uMVMatrix * vec4(uAtomRadius * aVertexPosition + uAtomPosition, 1.0);
-				gl_Position = transformedVertexPos;
-				vColor = uAtomColor;
-			}
+        varying vec3 vNormal;
+        varying vec3 vEyeVec;
+        varying vec3 vLightRay;
+
+        void main(void) {
+            vec4 vertex = uMVMatrix * vec4(aVertexPosition, 1.0);
+            vEyeVec = -vec3(vertex.xyz);
+            vNormal = normalize(aVertexPosition - uAtomPosition);
+            vec4 light = vec4(uLightPosition,1.0);
+            vLightRay = vertex.xyz - light.xyz;
+
+		    vec4 transformedVertexPos = uPMatrix * uMVMatrix * vec4(uAtomRadius * aVertexPosition + uAtomPosition, 1.0);
+			gl_Position = transformedVertexPos;
+		}
 
     </script>
     <script id="shader-fs" type="x-shader/x-fragment">
 			#ifdef GL_ES
 				precision highp float;
 			#endif
-			varying vec4 vColor;
+
+            uniform float uShininess;
+            uniform vec3 uLightAmbient;
+            uniform vec3 uMaterialDiffuse;
+            uniform vec3 uMaterialSpecular;
+    		uniform vec4 uAtomColor;
+
+            varying vec3 vNormal;
+            varying vec3 vLightRay;
+            varying vec3 vEyeVec;
+
 			void main(void) {
-		   		gl_FragColor = vColor;
+
+                vec3 L = normalize(vLightRay);
+                vec3 N = vNormal;
+
+                float lambertTerm = dot(N, -L);
+                // vec3 finalColor = uLightAmbient;
+                vec3 finalColor = vec3(uAtomColor.xyz);
+                if(lambertTerm > 0.0)
+                {
+                    finalColor += uMaterialDiffuse * lambertTerm;
+                    vec3 E = normalize(vEyeVec);
+                    vec3 R = reflect(L, N);
+                    float specular = pow(max(dot(R, E), 0.0), uShininess);
+                    finalColor += uMaterialSpecular * specular;
+                }
+
+		   		gl_FragColor = vec4(finalColor, 1.0);
 			}
 
     </script>
@@ -74,9 +112,28 @@
         }
 
         function changeMolecule(){
-            var select_molecule = document.getElementById("select_molecule");
-            setMolecule(select_molecule.selectedIndex);
+            var index = document.getElementById("select_molecule").selectedIndex;
+            setMolecule(index);
+            document.getElementById("molecule_name").innerHTML = molecules[index].name;
         }
+
+        /**
+         * Called in Renderer.js
+         * Used to init the <select> component with instanciated molecules
+         */
+        function initSelect()
+        {
+            var select = document.getElementById("select_molecule");
+
+            for(var i = 0; i < molecules.length; i++)
+            {
+                var opt = document.createElement('option');
+                opt.value = i;
+                opt.innerHTML = molecules[i].name;
+                select.appendChild(opt);
+            }
+        }
+
 
     </script>
 </head>
@@ -84,24 +141,25 @@
 
 <body onload="initWebGL()">
 <header>
-    <h1>molecular</h1>
+    <h1 id="header">molecular</h1>
     <p>© Roulin Thomas</p>
 </header>
 
 <div id="container">
     <div>
-        <p>Molecule</p>
+        <p class="info">
+            You can use <i>W,A,S,D</i>  to move the molecule and your mouse to rotate it.
+        </p>
         <label for="select_molecule">Choose your molecule</label>
+
         <select name="select_molecule" id="select_molecule" onchange="changeMolecule()">
-            <option value="0">Eau (H2O)</option>
-            <option value="1">Ethane (C2H6)</option>
         </select>
     </div>
-    <br>
+    <h3>Molecule displayed: <span id="molecule_name">Water (H2O)</span></h3>
     <canvas id="webgl-canvas" width=700" height="700">
         HTML5 is not supported
     </canvas>
 </div>
 </body>
-<script src='js/mouseMotionHandling.js'></script>
+    <script src='js/mouseMotionHandling.js'></script>
 </html>

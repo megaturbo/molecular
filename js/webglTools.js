@@ -82,7 +82,7 @@ requestAnimFrame = (function() {
         window.oRequestAnimationFrame ||
         window.msRequestAnimationFrame ||
         function( /* function FrameRequestCallback */ callback, /* DOMElement Element */ element) {
-            window.setTimeout(callback, 1000.0 / 60.0);
+            window.setTimeout(callback, 1000.0);
         };
 })();
 
