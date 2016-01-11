@@ -68,6 +68,8 @@ function Atom(base, position) {
     Atom.indicesBuffer = getIndexBufferWithIndices(atomIndices);
 
     this.draw = function (context) {
+        console.log("drawing " + this.name);
+
         context.bindBuffer(context.ARRAY_BUFFER, Atom.verticesBuffer);
         context.vertexAttribPointer(prg.vertexPositionAttribute, 3, context.FLOAT, false, 0, 0);
 
@@ -95,25 +97,38 @@ var H_RADIUS = 1.2;
 var O_RADIUS = 1.52;
 var C_RADIUS = 1.70;
 var S_RADIUS = 1.8;
-var Cl_RADIUS = 1.75;
+var CL_RADIUS = 1.75;
+
+var N_RADIUS = 1.3;
+var I_RADIUS = 1.4;
 
 var WHITE = new Color(0.8, 0.8, 0.8, 1.0);
 var RED = new Color(1.0, 0.0, 0.0, 1.0);
 var ORANGE = new Color(1.0, 0.5, 0.0, 1.0);
 var YELLOW = new Color(1.0, 1.0, 0.0, 1.0);
 var GREEN = new Color(0.0, 1.0, 0.0, 1.0);
+var BLUE = new Color(0.0, 0.0, 1.0, 1.0);
+var PURPLE = new Color(1.0, 0.0, 1.0, 1.0);
 
 var ATOM_HYDROGEN = new BaseAtom("H", WHITE, H_RADIUS);
 var ATOM_CARBON = new BaseAtom("C", ORANGE, C_RADIUS);
 var ATOM_SULFUR = new BaseAtom("S", YELLOW, S_RADIUS);
 var ATOM_OXYGEN = new BaseAtom("O", RED, O_RADIUS);
-var ATOM_CHLORINE = new BaseAtom("Cl", GREEN, Cl_RADIUS);
+var ATOM_CHLORINE = new BaseAtom("Cl", GREEN, CL_RADIUS);
+
+var ATOM_N = new BaseAtom("N", BLUE, N_RADIUS);
+var ATOM_I = new BaseAtom("I", PURPLE, I_RADIUS);
+
 
 var ATOMS = {};
 ATOMS["H"] = ATOM_HYDROGEN;
 ATOMS["C"] = ATOM_CARBON;
 ATOMS["S"] = ATOM_SULFUR;
 ATOMS["O"] = ATOM_OXYGEN;
+ATOMS["Cl"] = ATOM_CHLORINE;
+
+ATOMS["N"] = ATOM_N;
+ATOMS["I"] = ATOM_I;
 
 
 /**
@@ -211,7 +226,7 @@ function subdivise(v1, v2, v3, depth) {
 
 function initIcosahedron() {
     // Consts
-    const subdivisions = 5;
+    const subdivisions = 4;
     const X = 0.525731112119133696;
     const Z = 0.850650808352039932;
 

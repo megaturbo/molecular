@@ -13,154 +13,200 @@
     <script src="engine/molecular.js"></script>
 
     <script id="shader-vs" type="x-shader/x-vertex">
-        attribute vec3 aVertexPosition;
+    attribute vec3 aVertexPosition;
 
-		uniform vec3 uAtomPosition;
-		uniform vec4 uAtomColor;
-		uniform float uAtomRadius;
-		uniform mat4 uMVMatrix;
-		uniform mat4 uPMatrix;
-        uniform vec3 uLightAmbient;
-        uniform vec3 uMaterialDiffuse;
-        uniform vec3 uMaterialSpecular;
-        uniform vec3 uLightPosition;
+    uniform vec3 uAtomPosition;
+    uniform vec4 uAtomColor;
+    uniform float uAtomRadius;
 
-        uniform bool uAtomExplode;
+    uniform mat4 uMVMatrix;
+    uniform mat4 uPMatrix;
+    uniform mat4 uNMatrix;
 
-        varying vec3 vNormal;
-        varying vec3 vEyeVec;
-        varying vec3 vLightRay;
+    uniform vec3 uLightAmbient;
+    uniform vec3 uMaterialDiffuse;
+    uniform vec3 uMaterialSpecular;
+    uniform vec3 uLightPosition;
 
-        void main(void) {
-            vec4 vertex = uMVMatrix * vec4(aVertexPosition + uAtomPosition, 1.0);
-            vNormal = aVertexPosition;
+    uniform bool uAtomExplode;
 
-            vec4 light = vec4(uLightPosition, 1.0);
-            vLightRay = vertex.xyz - light.xyz;
-            vEyeVec = -vec3(vertex.xyz);
+    varying vec3 vNormal;
+    varying vec3 vEyeVec;
+    varying vec3 vLightRay;
 
-            float uAtomRadiusShow = uAtomRadius;
-            if(uAtomExplode){
-                uAtomRadiusShow = uAtomRadius * 0.2;
-            }
+    void main(void) {
+        vec4 vertex = uMVMatrix * vec4(aVertexPosition, 1.0);
+        vNormal = vec3(uNMatrix * vec4(aVertexPosition, 1.0));
 
-		    vec4 transformedVertexPos = uMVMatrix * vec4(uAtomRadiusShow * aVertexPosition + uAtomPosition, 1.0);
-			gl_Position = uPMatrix * transformedVertexPos;
-		}
+        vec4 light = vec4(uLightPosition, 1.0);
+        vLightRay = vertex.xyz - light.xyz;
+        vEyeVec = -vec3(vertex.xyz);
+
+        float uAtomRadiusShow = uAtomRadius;
+        if(uAtomExplode){
+            uAtomRadiusShow = uAtomRadius * 0.2;
+        }
+
+        vec4 transformedVertexPos = uMVMatrix * vec4(uAtomRadiusShow * aVertexPosition + uAtomPosition, 1.0);
+        gl_Position = uPMatrix * transformedVertexPos;
+    }
 
     </script>
     <script id="shader-fs" type="x-shader/x-fragment">
-			#ifdef GL_ES
-				precision highp float;
-			#endif
+    #ifdef GL_ES
+    precision highp float;
+    #endif
 
-            uniform float uShininess;
-            uniform vec3 uLightAmbient;
-            uniform vec3 uMaterialDiffuse;
-            uniform vec3 uMaterialSpecular;
-    		uniform vec4 uAtomColor;
+    uniform float uShininess;
+    uniform vec3 uLightAmbient;
+    uniform vec3 uMaterialDiffuse;
+    uniform vec3 uMaterialSpecular;
+    uniform vec4 uAtomColor;
 
-            varying vec3 vNormal;
-            varying vec3 vLightRay;
-            varying vec3 vEyeVec;
+    varying vec3 vNormal;
+    varying vec3 vLightRay;
+    varying vec3 vEyeVec;
 
-			void main(void) {
+    void main(void) {
 
-                vec3 L = normalize(vLightRay);
-                vec3 N = normalize(vNormal);
+        vec3 L = normalize(vLightRay);
+        vec3 N = normalize(vNormal);
 
-                float lambertTerm = dot(N, -L);
-                // vec3 finalColor = uLightAmbient;
-                vec3 finalColor = uAtomColor.xyz;
+        float lambertTerm = dot(N, -L);
+        // vec3 finalColor = uLightAmbient;
+        vec3 finalColor = uAtomColor.xyz;
 
-                if(lambertTerm > 0.0)
-                {
-                    finalColor += uMaterialDiffuse * lambertTerm;
-                    vec3 E = normalize(vEyeVec);
-                    vec3 R = reflect(L, N);
-                    float specular = pow(max(dot(R, E), 0.0), uShininess);
-                    finalColor += uMaterialSpecular * specular;
-                }
+        if(lambertTerm > 0.0)
+        {
+            finalColor += uMaterialDiffuse * lambertTerm;
+            vec3 E = normalize(vEyeVec);
+            vec3 R = reflect(L, N);
+            float specular = pow(max(dot(R, E), 0.0), uShininess);
+            finalColor += uMaterialSpecular * specular;
+        }
 
-		   		gl_FragColor = vec4(finalColor, 1.0);
-			}
+        gl_FragColor = vec4(finalColor, 1.0);
+    }
 
     </script>
 
     <script>
-        // Camera movements
-        var rotX = 0.0;
-        var rotY = 0.0;
-        var movX = 0.0;
-        var movY = 0.0;
-        var movZ = -5.0;
+    // Camera movements
+    var rotX = 0.0;
+    var rotY = 0.0;
+    var movX = 0.0;
+    var movY = 0.0;
+    var movZ = -5.0;
 
-        var mvMatrix = mat4.create();
-        var pMatrix = mat4.create();
+    var mvMatrix = mat4.create();
+    var pMatrix = mat4.create();
 
-        window.onkeydown = checkKey;
-        function checkKey(ev) {
-            switch (ev.keyCode) {
-                case 65:
-                    movX -= 0.2;
-                    break;
-                case 68:
-                    movX += 0.2;
-                    break;
-                case 87:
-                    movZ += 0.2;
-                    break;
-                case 83:
-                    movZ -= 0.2;
-                    break;
-                default:
-                    console.log(ev.keyCode);
-                    break;
-            }
+    window.onkeydown = checkKey;
+    function checkKey(ev) {
+        switch (ev.keyCode) {
+            case 65:
+            movX -= 0.2;
+            break;
+            case 68:
+            movX += 0.2;
+            break;
+            case 87:
+            movZ += 0.2;
+            break;
+            case 83:
+            movZ -= 0.2;
+            break;
+            default:
+            console.log(ev.keyCode);
+            break;
         }
+    }
 
-        function changeMolecule(){
-            var index = document.getElementById("select_molecule").selectedIndex;
-            setMolecule(index);
-            document.getElementById("molecule_name").innerHTML = molecules[index].name;
-        }
+    function changeMolecule(){
+        var index = document.getElementById("select_molecule").selectedIndex;
+        setMolecule(index);
+        document.getElementById("molecule_name").innerHTML = molecules[index].name;
+    }
 
-        /**
-         * Called in Renderer.js
-         * Used to init the <select> component with instanciated molecules
-         */
-        function initSelect()
+    /**
+    * Called in Renderer.js
+    * Used to init the <select> component with instanciated molecules
+    */
+    function initSelect()
+    {
+        var select = document.getElementById("select_molecule");
+        select.innerHTML = "";
+
+        for(var i = 0; i < molecules.length; i++)
         {
-            var select = document.getElementById("select_molecule");
-
-            for(var i = 0; i < molecules.length; i++)
-            {
-                var opt = document.createElement('option');
-                opt.value = i;
-                opt.innerHTML = molecules[i].name;
-                select.appendChild(opt);
-            }
+            var opt = document.createElement('option');
+            opt.value = i;
+            opt.innerHTML = molecules[i].name;
+            select.appendChild(opt);
         }
 
-        function toggleExplode()
+        document.getElementById('files').addEventListener('change', handleFileSelect, false);
+    }
+
+    function toggleExplode()
+    {
+        var btnExplode = document.getElementById("button_explode");
+        var atomExplode = btnExplode.value;
+
+        if(atomExplode == "0")
         {
-            var btnExplode = document.getElementById("button_explode");
-            var atomExplode = btnExplode.value;
-
-            if(atomExplode == "0")
-            {
-                atomExplode = 1;
-                btnExplode.innerHTML = "Explode<sup>-1</sup>";
-            }
-            else if(atomExplode == "1")
-            {
-                atomExplode = 0;
-                btnExplode.innerHTML = "Explode";
-            }
-
-            glContext.uniform1i(prg.atomExplode, atomExplode);
-            btnExplode.value = atomExplode;
+            atomExplode = 1;
+            btnExplode.innerHTML = "Explode<sup>-1</sup>";
         }
+        else if(atomExplode == "1")
+        {
+            atomExplode = 0;
+            btnExplode.innerHTML = "Explode";
+        }
+
+        glContext.uniform1i(prg.atomExplode, atomExplode);
+        btnExplode.value = atomExplode;
+    }
+
+    function handleFileSelect(evt) {
+        var files = evt.target.files; // FileList object
+
+        // Loop through the FileList and render image files as thumbnails.
+        for (var i = 0, f; f = files[i]; i++) {
+            var reader = new FileReader();
+
+            // Closure to capture the file information.
+            reader.onload = (function(theFile) {
+                return function(e) {
+                    var atoms = [];
+
+                    // Render thumbnail.
+                    var string = e.target.result;
+                    var lines = string.split("\n");
+                    for(var i = 2; i < lines.length; i++)
+                    {
+                        var array = lines[i].split(/\s+/);
+                        var a = [];
+                        for(var j = 0; j < array.length; j++)
+                        {
+                            if(array[j] != ""){
+                                a.push(array[j]);
+                            }
+                        }
+                        if(a.length == 4)
+                        {
+                            atoms.push(new Atom(ATOMS[a[0]], new Point3d(parseFloat(a[1]), parseFloat(a[2]), parseFloat(a[3]))));
+                        }
+                    }
+
+                    addMolecule(new Molecule(lines[1], atoms));
+
+                };
+            })(f);
+
+            reader.readAsText(f);
+        }
+    }
 
 
     </script>
@@ -168,33 +214,35 @@
 
 
 <body onload="initWebGL()">
-<header>
-    <h1 id="header">molecular</h1>
-    <p>© Roulin Thomas</p>
-</header>
-<div id="container">
-    <div id="left-menu">
-        <h3>Molecule displayed: <span id="molecule_name">Water (H2O)</span></h3>
-        <div id="molecule-selector">
-            <label for="select_molecule">Choose your molecule</label>
+    <header>
+        <h1 id="header">molecular</h1>
+        <p>© Roulin Thomas</p>
+    </header>
+    <div id="container">
+        <div id="left-menu">
+            <h3>Molecule displayed: <span id="molecule_name">Water (H2O)</span></h3>
+            <div id="molecule-selector">
+                <label for="select_molecule">Choose your molecule</label>
 
-            <select name="select_molecule" id="select_molecule" onchange="changeMolecule()">
-            </select>
+                <select name="select_molecule" id="select_molecule" onchange="changeMolecule()">
+                </select>
+            </div>
+            <label for="button_explode">Explode ?</label>
+            <button type="button" id="button_explode" value="0" onclick="toggleExplode()">Explode</button><br />
+            <label for="button_load_xyz">Load XYZ file</label>
+            <input type="file" id="files" name="files[]" accept=".xyz" />
         </div>
-        <label for="button_explode">Explode ?</label>
-        <button type="button" id="button_explode" value="0" onclick="toggleExplode()">Explode</button>
+        <div id="center">
+            <canvas id="webgl-canvas" width=700 height=700>
+                HTML5 is not supported
+            </canvas>
+        </div>
+        <div id="right-menu">
+            <p class="info">
+                You can use <i>W,A,S,D</i>  to move the molecule and your mouse to rotate it.
+            </p>
+        </div>
     </div>
-    <div id="center">
-        <canvas id="webgl-canvas" width=700 height=700>
-            HTML5 is not supported
-        </canvas>
-    </div>
-    <div id="right-menu">
-        <p class="info">
-            You can use <i>W,A,S,D</i>  to move the molecule and your mouse to rotate it.
-        </p>
-    </div>
-</div>
 </body>
-    <script src='js/mouseMotionHandling.js'></script>
+<script src='js/mouseMotionHandling.js'></script>
 </html>

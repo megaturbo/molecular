@@ -15,6 +15,12 @@ function initWebGL() {
 
 function drawScene() {
     scene.draw(glContext);
+
+    var nMatrix = mat4.create();
+    mat4.copy(nMatrix, mvMatrix);
+    mat4.invert(nMatrix, nMatrix);
+    mat4.transpose(nMatrix, nMatrix);
+    glContext.uniformMatrix4fv(prg.nMatrixUniform, false, nMatrix);
 }
 
 function initShaderParameters(prg) {
@@ -26,6 +32,8 @@ function initShaderParameters(prg) {
     // View
     prg.pMatrixUniform = glContext.getUniformLocation(prg, 'uPMatrix');
     prg.mvMatrixUniform = glContext.getUniformLocation(prg, 'uMVMatrix');
+    prg.nMatrixUniform = glContext.getUniformLocation(prg, 'uNMatrix');
+
 
     // Atoms
     prg.atomExplode = glContext.getUniformLocation(prg, "uAtomExplode");
@@ -46,8 +54,8 @@ function initLights(){
     glContext.uniform3f(prg.lightPositionUniform, 1, 1, 1);
     glContext.uniform3f(prg.lightAmbientUniform,0.7,0.3,0.1);
     glContext.uniform3f(prg.materialSpecularUniform, 0.5,0.5,0.5);
-    glContext.uniform3f(prg.materialDiffuseUniform, 0.6,0.6,0.6);
-    glContext.uniform1f(prg.shininessUniform, 24.0);
+    glContext.uniform3f(prg.materialDiffuseUniform, 0.3,0.3,0.3);
+    glContext.uniform1f(prg.shininessUniform, 12.0);
 }
 
 function initScene() {
@@ -108,6 +116,12 @@ function initScene() {
 
     initSelect();
     scene.set(molecules[0]);
+}
+
+function addMolecule(molecule)
+{
+    molecules.push(molecule);
+    initSelect();
 }
 
 function setMolecule(id) {
