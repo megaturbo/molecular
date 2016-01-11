@@ -14,7 +14,6 @@
 
     <script id="shader-vs" type="x-shader/x-vertex">
         attribute vec3 aVertexPosition;
-        // attribute vec4 aColor;
 
 		uniform vec3 uAtomPosition;
 		uniform vec4 uAtomColor;
@@ -26,19 +25,27 @@
         uniform vec3 uMaterialSpecular;
         uniform vec3 uLightPosition;
 
+        uniform bool uAtomExplode;
+
         varying vec3 vNormal;
         varying vec3 vEyeVec;
         varying vec3 vLightRay;
 
         void main(void) {
-            vec4 vertex = uMVMatrix * vec4(aVertexPosition, 1.0);
-            vEyeVec = -vec3(vertex.xyz);
-            vNormal = normalize(aVertexPosition - uAtomPosition);
-            vec4 light = vec4(uLightPosition,1.0);
-            vLightRay = vertex.xyz - light.xyz;
+            vec4 vertex = uMVMatrix * vec4(aVertexPosition + uAtomPosition, 1.0);
+            vNormal = aVertexPosition;
 
-		    vec4 transformedVertexPos = uPMatrix * uMVMatrix * vec4(uAtomRadius * aVertexPosition + uAtomPosition, 1.0);
-			gl_Position = transformedVertexPos;
+            vec4 light = vec4(uLightPosition, 1.0);
+            vLightRay = vertex.xyz - light.xyz;
+            vEyeVec = -vec3(vertex.xyz);
+
+            float uAtomRadiusShow = uAtomRadius;
+            if(uAtomExplode){
+                uAtomRadiusShow = uAtomRadius * 0.2;
+            }
+
+		    vec4 transformedVertexPos = uMVMatrix * vec4(uAtomRadiusShow * aVertexPosition + uAtomPosition, 1.0);
+			gl_Position = uPMatrix * transformedVertexPos;
 		}
 
     </script>
@@ -60,11 +67,12 @@
 			void main(void) {
 
                 vec3 L = normalize(vLightRay);
-                vec3 N = vNormal;
+                vec3 N = normalize(vNormal);
 
                 float lambertTerm = dot(N, -L);
                 // vec3 finalColor = uLightAmbient;
-                vec3 finalColor = vec3(uAtomColor.xyz);
+                vec3 finalColor = uAtomColor.xyz;
+
                 if(lambertTerm > 0.0)
                 {
                     finalColor += uMaterialDiffuse * lambertTerm;
@@ -134,6 +142,26 @@
             }
         }
 
+        function toggleExplode()
+        {
+            var btnExplode = document.getElementById("button_explode");
+            var atomExplode = btnExplode.value;
+
+            if(atomExplode == "0")
+            {
+                atomExplode = 1;
+                btnExplode.innerHTML = "Explode<sup>-1</sup>";
+            }
+            else if(atomExplode == "1")
+            {
+                atomExplode = 0;
+                btnExplode.innerHTML = "Explode";
+            }
+
+            glContext.uniform1i(prg.atomExplode, atomExplode);
+            btnExplode.value = atomExplode;
+        }
+
 
     </script>
 </head>
@@ -144,21 +172,28 @@
     <h1 id="header">molecular</h1>
     <p>© Roulin Thomas</p>
 </header>
-
 <div id="container">
-    <div>
+    <div id="left-menu">
+        <h3>Molecule displayed: <span id="molecule_name">Water (H2O)</span></h3>
+        <div id="molecule-selector">
+            <label for="select_molecule">Choose your molecule</label>
+
+            <select name="select_molecule" id="select_molecule" onchange="changeMolecule()">
+            </select>
+        </div>
+        <label for="button_explode">Explode ?</label>
+        <button type="button" id="button_explode" value="0" onclick="toggleExplode()">Explode</button>
+    </div>
+    <div id="center">
+        <canvas id="webgl-canvas" width=700 height=700>
+            HTML5 is not supported
+        </canvas>
+    </div>
+    <div id="right-menu">
         <p class="info">
             You can use <i>W,A,S,D</i>  to move the molecule and your mouse to rotate it.
         </p>
-        <label for="select_molecule">Choose your molecule</label>
-
-        <select name="select_molecule" id="select_molecule" onchange="changeMolecule()">
-        </select>
     </div>
-    <h3>Molecule displayed: <span id="molecule_name">Water (H2O)</span></h3>
-    <canvas id="webgl-canvas" width=700" height="700">
-        HTML5 is not supported
-    </canvas>
 </div>
 </body>
     <script src='js/mouseMotionHandling.js'></script>

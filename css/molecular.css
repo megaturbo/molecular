@@ -82,4 +82,21 @@ canvas {
 
 #container{
     margin: 20px;
+    width:100%;
+}
+
+#left-menu{
+    float:left;
+    width: 500px;
+}
+
+#center{
+    display: inline-block;
+    margin:0 auto;
+    width:100px;
+}
+
+#right-menu{
+    width: 500px;
+    float:right;
 }
