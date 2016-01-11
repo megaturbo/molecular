@@ -40,26 +40,9 @@ function initShaderParameters(prg) {
     prg.atomPositionUniform = glContext.getUniformLocation(prg, "uAtomPosition");
     prg.atomColorUniform = glContext.getUniformLocation(prg, "uAtomColor");
     prg.atomRadiusUniform = glContext.getUniformLocation(prg, "uAtomRadius");
-
-    // Lights
-    prg.shininessUniform           = glContext.getUniformLocation(prg, 'uShininess');
-    prg.lightAmbientUniform        = glContext.getUniformLocation(prg, 'uLightAmbient');
-    prg.materialDiffuseUniform     = glContext.getUniformLocation(prg, 'uMaterialDiffuse');
-    prg.materialSpecularUniform    = glContext.getUniformLocation(prg, 'uMaterialSpecular');
-    prg.lightPositionUniform       = glContext.getUniformLocation(prg, 'uLightPosition');
-}
-
-function initLights(){
-    console.log("initLights");
-    glContext.uniform3f(prg.lightPositionUniform, 1, 1, 1);
-    glContext.uniform3f(prg.lightAmbientUniform,0.7,0.3,0.1);
-    glContext.uniform3f(prg.materialSpecularUniform, 0.5,0.5,0.5);
-    glContext.uniform3f(prg.materialDiffuseUniform, 0.3,0.3,0.3);
-    glContext.uniform1f(prg.shininessUniform, 12.0);
 }
 
 function initScene() {
-    initLights();
     initMolecular();
     scene = new Scene();
 
@@ -114,14 +97,15 @@ function initScene() {
     molecules.push(new Molecule("Methane (CH4)", methane));
     molecules.push(new Molecule("Carbon Tetrachloride (CCl4)", carbon_tetrachloride));
 
-    initSelect();
+    refreshSelect();
     scene.set(molecules[0]);
 }
 
 function addMolecule(molecule)
 {
     molecules.push(molecule);
-    initSelect();
+    scene.set(molecules[molecules.length - 1]);
+    refreshSelect(molecules.length - 1);
 }
 
 function setMolecule(id) {

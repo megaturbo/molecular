@@ -68,8 +68,6 @@ function Atom(base, position) {
     Atom.indicesBuffer = getIndexBufferWithIndices(atomIndices);
 
     this.draw = function (context) {
-        console.log("drawing " + this.name);
-
         context.bindBuffer(context.ARRAY_BUFFER, Atom.verticesBuffer);
         context.vertexAttribPointer(prg.vertexPositionAttribute, 3, context.FLOAT, false, 0, 0);
 
