@@ -91,42 +91,55 @@ function BaseAtom(name, color, radius)
  * Atom Constants
  */
 
+// Van der Waals radii
 var H_RADIUS = 1.2;
-var O_RADIUS = 1.52;
 var C_RADIUS = 1.70;
-var S_RADIUS = 1.8;
+var N_RADIUS = 1.55;
+var O_RADIUS = 1.52;
+var F_RADIUS = 1.47;
 var CL_RADIUS = 1.75;
+var BR_RADIUS = 1.83;
+var I_RADIUS = 1.98;
+var P_RADIUS = 1.80;
+var S_RADIUS = 1.8;
 
-var N_RADIUS = 1.3;
-var I_RADIUS = 1.4;
-
-var WHITE = new Color(0.8, 0.8, 0.8, 1.0);
-var RED = new Color(1.0, 0.0, 0.0, 1.0);
-var ORANGE = new Color(1.0, 0.5, 0.0, 1.0);
-var YELLOW = new Color(1.0, 1.0, 0.0, 1.0);
-var GREEN = new Color(0.0, 1.0, 0.0, 1.0);
+// CPK coloring
+var WHITE = new Color(0.8, 0.8, 0.8, 1.0);      // Hydrogen
+var BLACK = new Color(0.1, 0.1, 0.1, 1.0);      // Carbon
+var SKY_BLUE = new Color(0.5, 0.8, 0.9);        // Nitrogen
+var RED = new Color(1.0, 0.0, 0.0, 1.0);        // Oxygen
+var GREEN = new Color(0.0, 1.0, 0.0, 1.0);      // Fluorine, Chlorine
+var DARK_RED = new Color(0.8, 0.1, 0.0, 1.0);   // Bromine
+var PURPLE = new Color(1.0, 0.0, 1.0, 1.0);     // Iodine
+var CYAN = new Color(0.0, 1.0, 1.0, 0.0);       // He, Ne, Ar, Xe, Kr
+var ORANGE = new Color(1.0, 0.5, 0.0, 1.0);     // Phosphorus
+var YELLOW = new Color(1.0, 1.0, 0.0, 1.0);     // Sulfur
 var BLUE = new Color(0.0, 0.0, 1.0, 1.0);
-var PURPLE = new Color(1.0, 0.0, 1.0, 1.0);
 
 var ATOM_HYDROGEN = new BaseAtom("H", WHITE, H_RADIUS);
-var ATOM_CARBON = new BaseAtom("C", ORANGE, C_RADIUS);
-var ATOM_SULFUR = new BaseAtom("S", YELLOW, S_RADIUS);
+var ATOM_CARBON = new BaseAtom("C", BLACK, C_RADIUS);
+var ATOM_NITROGEN = new BaseAtom("N", SKY_BLUE, N_RADIUS);
 var ATOM_OXYGEN = new BaseAtom("O", RED, O_RADIUS);
+var ATOM_FLUORIN = new BaseAtom("F", GREEN, F_RADIUS);
 var ATOM_CHLORINE = new BaseAtom("Cl", GREEN, CL_RADIUS);
-
-var ATOM_N = new BaseAtom("N", BLUE, N_RADIUS);
-var ATOM_I = new BaseAtom("I", PURPLE, I_RADIUS);
+var ATOM_BROMINE = new BaseAtom("Br", DARK_RED, BR_RADIUS);
+var ATOM_IODINE = new BaseAtom("I", PURPLE, I_RADIUS);
+var ATOM_PHOSPHORUS = new BaseAtom("P", ORANGE, P_RADIUS);
+var ATOM_SULFUR = new BaseAtom("S", YELLOW, S_RADIUS);
 
 
 var ATOMS = {};
 ATOMS["H"] = ATOM_HYDROGEN;
 ATOMS["C"] = ATOM_CARBON;
-ATOMS["S"] = ATOM_SULFUR;
+ATOMS["N"] = ATOM_NITROGEN;
 ATOMS["O"] = ATOM_OXYGEN;
+ATOMS["F"] = ATOM_FLUORIN;
 ATOMS["Cl"] = ATOM_CHLORINE;
+ATOMS["Br"] = ATOM_BROMINE;
+ATOMS["I"] = ATOM_IODINE;
+ATOMS["P"] = ATOM_PHOSPHORUS;
+ATOMS["S"] = ATOM_SULFUR;
 
-ATOMS["N"] = ATOM_N;
-ATOMS["I"] = ATOM_I;
 
 
 /**
