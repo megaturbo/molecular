@@ -109,5 +109,5 @@ function addMolecule(molecule)
 }
 
 function setMolecule(id) {
-    scene.set(molecules[id]);
+    scene.add(molecules[id]);
 }
