@@ -188,6 +188,7 @@
                     var lines = string.split("\n");
                     for(var i = 2; i < lines.length; i++)
                     {
+                        document.getElementById("file_content").innerHTML += lines[i] + "<br />"
                         var array = lines[i].split(/\s+/);
                         var a = [];
                         for(var j = 0; j < array.length; j++)
@@ -246,11 +247,7 @@
                 HTML5 is not supported
             </canvas>
         </div>
-        <div id="right-menu">
-            <p class="info">
-
-            </p>
-        </div>
+        <p id="file_content"></p>
     </div>
 </body>
 <script src='js/mouseMotionHandling.js'></script>
